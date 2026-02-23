@@ -9,6 +9,16 @@ This uses YOLO hand detector (like WiLoR) instead of Detectron2 + ViTPose.
 
 from pathlib import Path
 import torch
+
+# Fix for PyTorch 2.7+ where torch.load defaults to weights_only=True
+# This breaks loading of many model checkpoints (YOLO, HaMeR, etc.)
+_original_torch_load = torch.load
+def _patched_torch_load(*args, **kwargs):
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return _original_torch_load(*args, **kwargs)
+torch.load = _patched_torch_load
+
 import argparse
 import os
 import sys
