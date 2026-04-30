@@ -1632,9 +1632,11 @@ def main():
     parser.add_argument('--conf', type=float, default=2.0, help='Factor for padding the bbox')
     parser.add_argument('--type', type=str, default='EgoDexter', help='Path to pretrained model checkpoint')
     parser.add_argument('--render', dest='render', action='store_true', default=False, help='If set, render side view also')
-    parser.add_argument('--yolo_model', type=str, default='./pretrained_models/detector.pt', 
+    parser.add_argument('--yolo_model', type=str, default='./pretrained_models/detector.pt',
                         help='Path to YOLO hand detector model (like WiLoR detector.pt)')
-    
+    parser.add_argument('--no_viz', action='store_true', default=False,
+                        help='Skip Pass 1/2 bbox visualizations, trajectory plots, and visualization videos')
+
     args = parser.parse_args()
     
     # Setup
@@ -1659,12 +1661,14 @@ def main():
     yolo_detector = YOLO(args.yolo_model)
     yolo_detector.to(device)
     
-    # Load renderer
-    renderer = Renderer(model_cfg, faces=model.mano.faces)
-    
-    # Create visualization directory
+    # Load renderer only when --render is requested (saves GPU memory otherwise)
+    renderer = None
+    if args.render:
+        renderer = Renderer(model_cfg, faces=model.mano.faces)
+
+    # Create visualization directory (skip if --no_viz)
     vis_dir = None
-    if args.render and args.res_folder is not None:
+    if not args.no_viz and args.render and args.res_folder is not None:
         vis_dir = os.path.join(os.path.dirname(args.res_folder), f'bbox_vis_{model_cfg.EXTRA.FOCAL_LENGTH}')
         os.makedirs(vis_dir, exist_ok=True)
         print(f"\nBbox visualizations will be saved to: {vis_dir}")
