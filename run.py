@@ -1566,6 +1566,7 @@ def run_hamer_on_cleaned_bboxes(raw_data, model, model_cfg, renderer, args):
         results_dict[img_path] = {
             'mano': all_mano_params,
             'cam_trans': all_cam_t,
+            'bbox': all_bboxes,
             'tracked_ids': all_right,
             'tracked_time': [0] * len(all_right),
             'extra_data': extra_data,
